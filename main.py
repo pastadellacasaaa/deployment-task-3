@@ -17,7 +17,7 @@ class Task(BaseModel):
 def home():
     return {
         "status": "success",
-        "message": "Task Tracker API UPDATED v2"
+        "message": "Task Tracker API UPDATED v3"
     }
 
 
