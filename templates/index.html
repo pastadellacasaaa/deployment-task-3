@@ -1,72 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Tracker</title>
-
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
 </head>
-
 <body>
     <div class="container">
-
-        <div class="header">
+        <div class="card">
             <h1>Task Tracker</h1>
-            <p>Manage your daily tasks efficiently</p>
-        </div>
+            <p class="subtitle">Add, view and complete your tasks using MongoDB storage.</p>
 
-        <div class="task-form">
-            <form action="/add-task" method="post">
-                <input 
-                    type="text" 
-                    name="title" 
-                    placeholder="Enter a new task..." 
-                    required
-                >
-
-                <button type="submit">
-                    Add Task
-                </button>
+            <form action="/add-task" method="post" class="task-form">
+                <input type="text" name="title" placeholder="Enter a new task..." required>
+                <button type="submit">Add Task</button>
             </form>
-        </div>
 
-        <div class="task-section">
-            <h2>Your Tasks</h2>
+            <h2>Tasks</h2>
 
             {% if tasks %}
                 <ul class="task-list">
                     {% for task in tasks %}
                         <li class="task-item">
-                            
-                            <div class="task-info">
-                                <span class="task-title">
-                                    {{ task.title }}
-                                </span>
+                            <span class="{% if task.done %}done{% endif %}">
+                                {{ task.title }}
+                            </span>
 
-                                {% if task.done %}
-                                    <span class="status done">
-                                        Completed
-                                    </span>
-                                {% else %}
-                                    <span class="status pending">
-                                        Pending
-                                    </span>
-                                {% endif %}
-                            </div>
-
+                            {% if task.done %}
+                                <span class="badge completed">Done</span>
+                            {% else %}
+                                <a href="/done/{{ task.id }}" class="badge pending">Mark Done</a>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>
-
             {% else %}
-                <div class="empty-state">
-                    No tasks added yet.
-                </div>
+                <p class="empty">No tasks yet. Add your first task above.</p>
             {% endif %}
-
         </div>
-
     </div>
 </body>
 </html>
