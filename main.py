@@ -1,10 +1,19 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MONGO_URL = os.getenv("MONGO_URL")
+
+client = MongoClient(MONGO_URL)
+db = client.tasktracker
+tasks_collection = db.tasks
 
 app = FastAPI()
 
-# in-memory "database"
-tasks = []
 
 class Task(BaseModel):
     title: str
@@ -17,7 +26,7 @@ class Task(BaseModel):
 def home():
     return {
         "status": "success",
-        "message": "Task Tracker API UPDATED v3"
+        "message": "Task Tracker API with MongoDB"
     }
 
 
@@ -26,12 +35,20 @@ def home():
 # -------------------
 @app.post("/tasks")
 def add_task(task: Task):
+    # Generate a simple numeric ID
+    last_task = tasks_collection.find_one(sort=[("id", -1)])
+    new_id = 1 if last_task is None else last_task["id"] + 1
+
     new_task = {
-        "id": len(tasks) + 1,
+        "id": new_id,
         "title": task.title,
         "done": False
     }
-    tasks.append(new_task)
+
+    tasks_collection.insert_one(new_task)
+
+    # Remove MongoDB's internal _id before returning response
+    new_task.pop("_id", None)
 
     return {
         "status": "success",
@@ -45,6 +62,8 @@ def add_task(task: Task):
 # -------------------
 @app.get("/tasks")
 def get_tasks():
+    tasks = list(tasks_collection.find({}, {"_id": 0}))
+
     return {
         "status": "success",
         "count": len(tasks),
@@ -57,16 +76,24 @@ def get_tasks():
 # -------------------
 @app.put("/tasks/{task_id}")
 def mark_done(task_id: int):
-    for task in tasks:
-        if task["id"] == task_id:
-            task["done"] = True
-            return {
-                "status": "success",
-                "message": "Task marked as completed",
-                "task": task
-            }
+    result = tasks_collection.update_one(
+        {"id": task_id},
+        {"$set": {"done": True}}
+    )
+
+    if result.matched_count == 0:
+        return {
+            "status": "error",
+            "message": "Task not found"
+        }
+
+    updated_task = tasks_collection.find_one(
+        {"id": task_id},
+        {"_id": 0}
+    )
 
     return {
-        "status": "error",
-        "message": "Task not found"
+        "status": "success",
+        "message": "Task marked as completed",
+        "task": updated_task
     }

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tracker</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="header">
+            <h1>Task Tracker</h1>
+            <p>Manage your daily tasks efficiently</p>
+        </div>
+
+        <div class="task-form">
+            <form action="/add-task" method="post">
+                <input 
+                    type="text" 
+                    name="title" 
+                    placeholder="Enter a new task..." 
+                    required
+                >
+
+                <button type="submit">
+                    Add Task
+                </button>
+            </form>
+        </div>
+
+        <div class="task-section">
+            <h2>Your Tasks</h2>
+
+            {% if tasks %}
+                <ul class="task-list">
+                    {% for task in tasks %}
+                        <li class="task-item">
+                            
+                            <div class="task-info">
+                                <span class="task-title">
+                                    {{ task.title }}
+                                </span>
+
+                                {% if task.done %}
+                                    <span class="status done">
+                                        Completed
+                                    </span>
+                                {% else %}
+                                    <span class="status pending">
+                                        Pending
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+                <div class="empty-state">
+                    No tasks added yet.
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</body>
+</html>

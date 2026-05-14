@@ -1,3 +1,7 @@
 fastapi
 uvicorn
+Flask
+gunicorn
+psycopg2-binary
 python-dotenv
+pymongo
